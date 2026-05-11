@@ -90,9 +90,9 @@ impl Error {
     pub fn user_facing_error(&self, stage: SetupStage) -> UserFacingError {
         let body = format!("Failed to {}", stage.action_description());
         let detail = match self {
-            Self::TimedOut => {
-                Some("The operation timed out — check your network connection".into())
-            }
+            Self::TimedOut => Some(
+                "Timed out while waiting for the remote host to respond. Check that your SSH connection is stable, then reconnect to retry the Warp SSH extension.".into(),
+            ),
             Self::UnsupportedOs { os } => Some(format!("Unsupported OS: {os}")),
             Self::UnsupportedArch { arch } => Some(format!("Unsupported architecture: {arch}")),
             Self::ScriptFailed { exit_code, stderr } => {
@@ -251,4 +251,22 @@ pub trait RemoteTransport: Send + Sync + std::fmt::Debug {
     /// code 255) should return `false`, which tells the manager to skip
     /// the reconnect loop entirely.
     fn is_reconnectable(&self, exit_status: Option<&RemoteServerExitStatus>) -> bool;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{Error, SetupStage};
+
+    #[test]
+    fn timeout_user_facing_error_explains_ssh_reconnect() {
+        let error = Error::TimedOut.user_facing_error(SetupStage::CheckBinary);
+
+        assert_eq!(error.body, "Failed to verify SSH extension");
+        assert_eq!(
+            error.detail.as_deref(),
+            Some(
+                "Timed out while waiting for the remote host to respond. Check that your SSH connection is stable, then reconnect to retry the Warp SSH extension."
+            )
+        );
+    }
 }
