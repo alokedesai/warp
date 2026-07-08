@@ -1,0 +1,14 @@
+inputSet:
+  name: Build_alokedesai_warp_1783525922663-pr-trigger-input-set
+  identifier: Build_alokedesai_warp_1783525922663prtriggerinputset
+  orgIdentifier: default
+  projectIdentifier: default_project
+  pipeline:
+    identifier: Build_alokedesai_warp_1783525922663
+    properties:
+      ci:
+        codebase:
+          build:
+            type: PR
+            spec:
+              number: <+trigger.prNumber>
