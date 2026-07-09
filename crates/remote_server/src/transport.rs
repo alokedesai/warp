@@ -90,9 +90,9 @@ impl Error {
     pub fn user_facing_error(&self, stage: SetupStage) -> UserFacingError {
         let body = format!("Failed to {}", stage.action_description());
         let detail = match self {
-            Self::TimedOut => {
-                Some("The operation timed out — check your network connection".into())
-            }
+            Self::TimedOut => Some(
+                "Timed out while waiting for the remote host to respond. Check that your SSH connection is stable, then reconnect to retry the Warp SSH extension.".into(),
+            ),
             Self::UnsupportedOs { os } => Some(format!("Unsupported OS: {os}")),
             Self::UnsupportedArch { arch } => Some(format!("Unsupported architecture: {arch}")),
             Self::ScriptFailed { exit_code, stderr } => {
@@ -252,3 +252,7 @@ pub trait RemoteTransport: Send + Sync + std::fmt::Debug {
     /// the reconnect loop entirely.
     fn is_reconnectable(&self, exit_status: Option<&RemoteServerExitStatus>) -> bool;
 }
+
+#[cfg(test)]
+#[path = "transport_tests.rs"]
+mod tests;
